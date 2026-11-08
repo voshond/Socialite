@@ -114,7 +114,7 @@ L["MENU_GUILD_SORT_ZONE_DESCRIPTION"] = "Sort by guild member zone/login date"
 L['Display Settings'] = 'Display Settings'
 L['Show minimap button'] = 'Show minimap button'
 L['Show the Scoreboard minimap button'] = 'Show the Scoreboard minimap button'
-L["usageDescription"] = "Left-click to view social panes. Alt+Click to invite. Right-click to configure."
+L["usageDescription"] = "Left-click to view social panes. Shift+Click to invite. Right-click to configure."
 
 L['ShowGroupMembers'] = "Show Group Members"
 L['ShowGroupMembersDescription'] = "Show an indicator icon next to a friend when in the same group"

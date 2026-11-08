@@ -1,1 +1,7 @@
 package-as: Socialite
+
+ignore:
+  - tests
+  - scripts
+  - AGENTS.md
+  - DEVELOPMENT.md

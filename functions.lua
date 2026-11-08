@@ -168,8 +168,10 @@ local function clickPlayer(frame, info, button)
   local player, isGuild, isMobile = unpack(info)
   if player ~= "" then
     if button == "LeftButton" then
-      if IsAltKeyDown() then
-        C_PartyInfo.InviteUnit(player)
+      if IsShiftKeyDown() then
+        if not isMobile then
+          C_PartyInfo.InviteUnit(player)
+        end
       else
         ChatFrame_SendTell(player)
       end
@@ -218,7 +220,7 @@ end
 local function clickRealID(frame, info, button)
   local accountName, bnetAccountID = unpack(info)
   if button == "LeftButton" then
-    if IsAltKeyDown() then
+    if IsShiftKeyDown() then
       if CanGroupWithAccount(bnetAccountID) then
         sendBattleNetInvite(bnetAccountID)
       end
@@ -766,8 +768,10 @@ function addon:renderGuild(tooltip, collapseGuildVar)
 	local collapseGuild = addon.db[collapseGuildVar]
 	addHeader(L.TOOLTIP_GUILD, "00FF00", numOnline, numTotal, collapseGuild, collapseGuildVar)
 
-	for i, guildIndex in ipairs(roster) do
-    processGuildMember(guildIndex, tooltip)
+	if not collapseGuild then
+		for i, guildIndex in ipairs(roster) do
+			processGuildMember(guildIndex, tooltip)
+		end
 	end
 
 	if wasOffline then
