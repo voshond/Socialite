@@ -1,0 +1,27 @@
+name: Tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: LuaJIT test suite
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install LuaJIT
+        run: sudo apt-get update && sudo apt-get install -y luajit
+      - name: Run all tests and addon syntax checks
+        run: bash scripts/run-tests.sh --times -j
