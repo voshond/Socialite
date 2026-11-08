@@ -168,8 +168,10 @@ local function clickPlayer(frame, info, button)
   local player, isGuild, isMobile = unpack(info)
   if player ~= "" then
     if button == "LeftButton" then
-      if IsAltKeyDown() then
-        C_PartyInfo.InviteUnit(player)
+      if IsShiftKeyDown() then
+        if not isMobile then
+          C_PartyInfo.InviteUnit(player)
+        end
       else
         ChatFrame_SendTell(player)
       end
@@ -218,7 +220,7 @@ end
 local function clickRealID(frame, info, button)
   local accountName, bnetAccountID = unpack(info)
   if button == "LeftButton" then
-    if IsAltKeyDown() then
+    if IsShiftKeyDown() then
       if CanGroupWithAccount(bnetAccountID) then
         sendBattleNetInvite(bnetAccountID)
       end
