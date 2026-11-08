@@ -212,7 +212,7 @@ function Mock.Install()
 	Mock.widgets = {}
 	Mock.calls = {}
 	Mock.printed = {}
-	Mock.state = { guild = {}, friends = {}, bnet = {}, guildName = nil, shift = false, alt = false, ctrl = false }
+	Mock.state = { guild = {}, friends = {}, bnet = {}, guildName = nil, showOffline = false, shift = false, alt = false, ctrl = false }
 	for _, name in ipairs(OWNED) do _G[name] = nil end
 
 	local G = _G
@@ -403,8 +403,8 @@ function Mock.Install()
 	G.IsInGuild = function() return Mock.state.guildName ~= nil end
 	G.GetGuildInfo = function() return Mock.state.guildName end
 	G.GetNumGuildMembers = function() return #Mock.state.guild, #Mock.state.guild end
-	G.GetGuildRosterShowOffline = function() return false end
-	G.SetGuildRosterShowOffline = noop
+	G.GetGuildRosterShowOffline = function() return Mock.state.showOffline end
+	G.SetGuildRosterShowOffline = function(show) Mock.state.showOffline = show end
 	G.CanViewOfficerNote = function() return true end
 	G.GetGuildRosterInfo = function(index)
 		local m = Mock.state.guild[index]

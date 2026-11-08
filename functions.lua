@@ -768,8 +768,10 @@ function addon:renderGuild(tooltip, collapseGuildVar)
 	local collapseGuild = addon.db[collapseGuildVar]
 	addHeader(L.TOOLTIP_GUILD, "00FF00", numOnline, numTotal, collapseGuild, collapseGuildVar)
 
-	for i, guildIndex in ipairs(roster) do
-    processGuildMember(guildIndex, tooltip)
+	if not collapseGuild then
+		for i, guildIndex in ipairs(roster) do
+			processGuildMember(guildIndex, tooltip)
+		end
 	end
 
 	if wasOffline then

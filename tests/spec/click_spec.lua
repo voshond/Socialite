@@ -161,5 +161,28 @@ describe("tooltip clicks", function()
 			assert.is_false(ns.db.CollapseFriends)
 			assert.is_not_nil(Helpers.TooltipLine("Buddy"))
 		end)
+
+		it("collapses and expands the guild list #collapse", function()
+			local ns = Open()
+			local header = NORMAL_FONT_COLOR_CODE .. ns.L.TOOLTIP_GUILD .. ":"
+			Helpers.ClickLine(header, "LeftButton")
+			assert.is_true(ns.db.CollapseGuild)
+			assert.is_not_nil(Helpers.TooltipLine(header))
+			for _, member in ipairs({ "Guildie", "Faraway", "Phoney" }) do
+				assert.has_error(function() Helpers.TooltipLine(member) end, member .. " hidden")
+			end
+			Helpers.ClickLine(header, "LeftButton")
+			assert.is_false(ns.db.CollapseGuild)
+			assert.is_not_nil(Helpers.TooltipLine("Guildie"))
+		end)
+
+		it("restores the roster's show-offline setting when collapsed #collapse", function()
+			local ns = Helpers.LoadAddon({ saved = { CollapseGuild = true } })
+			Mock.SetGuild(GUILD)
+			SetGuildRosterShowOffline(true)
+			Helpers.OpenTooltip(ns)
+			assert.is_true(GetGuildRosterShowOffline())
+			assert.has_error(function() Helpers.TooltipLine("Guildie") end)
+		end)
 	end)
 end)
