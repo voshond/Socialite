@@ -101,4 +101,35 @@ function Helpers.LoadAddon(options)
 	return ns
 end
 
+-- Opens the data broker tooltip the way hovering the data text does.
+function Helpers.OpenTooltip(ns)
+	ns.dataobj.OnEnter(UIParent)
+end
+
+local function LineText(line)
+	local parts = {}
+	for _, cell in ipairs(line.cells) do
+		if cell then parts[#parts + 1] = cell.fontString:GetText() or "" end
+	end
+	return table.concat(parts, " ")
+end
+
+-- The shown tooltip line whose cells contain text (plain match).
+function Helpers.TooltipLine(text)
+	for _, widget in ipairs(Mock.widgets) do
+		if rawget(widget, "cells") and widget:IsShown() and LineText(widget):find(text, 1, true) then
+			return widget
+		end
+	end
+	error("no tooltip line contains " .. text, 2)
+end
+
+-- Clicks the tooltip line containing text, with the given modifiers held.
+function Helpers.ClickLine(text, button, modifiers)
+	local line = Helpers.TooltipLine(text)
+	Mock.SetModifiers(modifiers or {})
+	Mock.RunScript(line, "OnMouseDown", button or "LeftButton")
+	Mock.SetModifiers({})
+end
+
 return Helpers
