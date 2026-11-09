@@ -90,6 +90,16 @@ function Setup.Adapter()
 	return adapter
 end
 
+-- Every scenario must paint Titan's bar skin: a live background texture of
+-- the top bar that resolves to Titan's own .tga.
+function Setup.CheckTitanSkin()
+	local background = _G.TitanPanelBackground_Bar
+	assert(background and Helpers.IsLive(background), "Titan's top bar has no live background texture")
+	assert(background:IsVisible(), "Titan's top bar background is hidden")
+	local file = Setup.Texture(background:GetTexture())
+	assert(file and file:match("%.tga$"), "Titan's bar skin " .. tostring(background:GetTexture()) .. " resolves to " .. tostring(file))
+end
+
 function Setup.Proof(options)
 	options = options or {}
 	return Proof.New({

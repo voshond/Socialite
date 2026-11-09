@@ -28,11 +28,28 @@ function Helpers.TocFiles(tocPath)
 	return out
 end
 
+-- Globals the fresh client has; anything else was made by loaded addons.
+local clientGlobals
+
+-- A fresh mock client without the previous load's addon globals: addons like
+-- Titan reuse named frames they find (_G.TitanPanelBackground_Bar), which
+-- would otherwise be the previous client's dead objects.
+function Helpers.Install()
+	if clientGlobals then
+		for key in pairs(_G) do
+			if not clientGlobals[key] then _G[key] = nil end
+		end
+	end
+	Mock.Install()
+	clientGlobals = {}
+	for key in pairs(_G) do clientGlobals[key] = true end
+end
+
 -- Fresh mock client + freshly loaded Socialite. Fires ADDON_LOADED unless
 -- options.loaded == false. options.saved seeds SocialiteSettings.
 function Helpers.LoadAddon(options)
 	options = options or {}
-	Mock.Install()
+	Helpers.Install()
 	_G.SocialiteSettings = options.saved
 	local ns = Loader.LoadToc("./Socialite.toc", "Socialite")
 	if options.loaded ~= false then
@@ -48,7 +65,7 @@ end
 function Helpers.LoadWithTitan(options)
 	options = options or {}
 	require("mock.titan")
-	Mock.Install()
+	Helpers.Install()
 	_G.SocialiteSettings = options.saved
 	Loader.LoadAddon("Titan")
 	local ns = Loader.LoadToc("./Socialite.toc", "Socialite")
@@ -60,6 +77,14 @@ function Helpers.LoadWithTitan(options)
 	Mock.RunTimers()
 	Titan_G.plugins.AddOnBar("Bar", "Socialite")
 	return ns, _G[TitanUtils_ButtonName("Socialite")]
+end
+
+-- Whether object belongs to the current mock client (not a previous load's).
+function Helpers.IsLive(object)
+	for _, live in ipairs(Mock.objects) do
+		if live == object then return true end
+	end
+	return false
 end
 
 -- The text a Titan button shows.

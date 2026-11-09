@@ -32,6 +32,17 @@ describe("Titan Panel #titan", function()
 		assert.is_true(button:GetTop() > UIParent:GetHeight() - 30, "button sits on the top bar")
 	end)
 
+	it("builds a fresh bar background on every load", function()
+		Helpers.LoadWithTitan()
+		local first = _G.TitanPanelBackground_Bar
+		Helpers.LoadWithTitan()
+		local background = _G.TitanPanelBackground_Bar
+		assert.is_not_nil(background)
+		assert.is_true(background ~= first, "not the previous load's texture")
+		assert.is_true(Helpers.IsLive(background))
+		assert.equals("Interface\\AddOns\\Titan\\Artwork\\TitanPanelBackgroundTop0", background:GetTexture())
+	end)
+
 	it("shows the data object's text and follows its changes", function()
 		local ns, button = Helpers.LoadWithTitan()
 		RosterArrives()
