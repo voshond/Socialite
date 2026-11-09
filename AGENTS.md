@@ -23,12 +23,13 @@
 
 ## Tests and install
 
-- Run `bash scripts/run-tests.sh` before handing work back; it syntax-checks every Lua file and runs
-  `tests/spec/*_spec.lua` under LuaJIT (Lua 5.1 fallback). Filters: a path fragment, `-t "name text"`,
-  `--tag tag`. See `DEVELOPMENT.md`.
+- Run `bash scripts/run-tests.sh` before handing work back; it fetches the pinned wow-ui-testing library
+  (`.wut-version`) into `.wut/`, syntax-checks every Lua file and runs `tests/spec/*_spec.lua` under LuaJIT
+  (Lua 5.1 fallback). Filters: a path fragment, `-t "name text"`, `--tag tag`. See `DEVELOPMENT.md`.
+- `.wut/` is fetched, never edited or committed; fix the library in its own repo.
 - Behaviour changes come with specs. Use `tests/helpers.lua` (`Helpers.LoadAddon()`) and the mock's seeding and
-  call recording rather than ad-hoc globals; extend `tests/mock/wow.lua` minimally when code needs a new API.
+  call recording rather than ad-hoc globals; extend `tests/mock/socialite.lua` minimally when code needs a new API.
 - `scripts/install.sh` copies (or `--link`s) the addon into the Forever client; override the client with
   `WOW_DIR`. Don't install into the game unless asked.
 - Releases are built by the BigWigs packager (`.github/workflows/deploy-packager.yml`, `.pkgmeta`); keep
-  dev-only folders in `.pkgmeta`'s ignore list.
+  dev-only folders (`tests`, `scripts`, `.wut`) in `.pkgmeta`'s ignore list.
