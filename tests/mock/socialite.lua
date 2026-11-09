@@ -60,38 +60,8 @@ local function OnlineFriends()
 	return online
 end
 
--- ElvUI and Tukui add these skin methods; tooltip.lua probes for them, and
--- without those addons the client reads nil.
-local SKIN_METHODS = { StripTextures = true, CreateBackdrop = true }
-local function WithoutSkinMethods(objectMT)
-	if objectMT.__socialiteSkins then return end
-	local index = objectMT.__index
-	objectMT.__index = function(obj, key)
-		if SKIN_METHODS[key] then return nil end
-		return index(obj, key)
-	end
-	objectMT.__socialiteSkins = true
-end
-
 local function InstallClient(G)
 	G.GetBindingText = function(key) return key end
-	-- FrameXML's ChatFrame, which the vendored AceGUI edit boxes hook.
-	G.ChatEdit_InsertLink = function() return false end
-	-- tooltip.lua inherits TooltipBackdropTemplate only when its mixin exists.
-	G.TooltipBackdropTemplateMixin = G.TooltipBackdropTemplateMixin or {}
-	-- GameTooltip and the fonts tooltip.lua copies from it.
-	G.GameTooltip = Mock.NewObject("GameTooltip", UIParent, "GameTooltip")
-	CreateFont("GameTooltipText"):SetFont([[Fonts\FRIZQT__.TTF]], 12, "")
-	CreateFont("GameTooltipHeaderText"):SetFont([[Fonts\FRIZQT__.TTF]], 14, "")
-
-	-- The classes the specs' social data uses.
-	G.RAID_CLASS_COLORS = {
-		WARRIOR = { colorStr = "ffc69b6d" },
-		MAGE = { colorStr = "ff3fc7eb" },
-		PRIEST = { colorStr = "ffffffff" },
-	}
-	G.LOCALIZED_CLASS_NAMES_MALE = { WARRIOR = "Warrior", MAGE = "Mage", PRIEST = "Priest" }
-	G.LOCALIZED_CLASS_NAMES_FEMALE = { WARRIOR = "Warrior", MAGE = "Mage", PRIEST = "Priest" }
 
 	-- Strings.
 	G.CHAT_FLAG_AFK = "<AFK>"
@@ -200,7 +170,6 @@ Mock.Extend("Socialite", {
 		Mock.calls = {}
 		Mock.social = { guild = {}, friends = {}, bnet = {}, guildName = nil, showOffline = false,
 			shift = false, alt = false, ctrl = false }
-		WithoutSkinMethods(getmetatable(UIParent))
 		InstallClient(_G)
 		InstallSocial(_G)
 	end,
