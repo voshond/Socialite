@@ -3,5 +3,7 @@ package-as: Socialite
 ignore:
   - tests
   - scripts
+  - .wut
+  - .wut-version
   - AGENTS.md
   - DEVELOPMENT.md

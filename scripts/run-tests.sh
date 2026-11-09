@@ -5,7 +5,9 @@
 #   -j [N]       run spec files in N parallel processes (default: one per CPU)
 #   -t text      only tests whose full name contains text
 #   --tag tag    only tests tagged #tag
-# Uses luajit, or lua5.1 when LuaJIT isn't installed.
+# Uses luajit, or lua5.1 when LuaJIT isn't installed. Fetches the pinned
+# wow-ui-testing library into .wut/ first (WUT_DIR=../wow-ui-testing uses a
+# local checkout instead).
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
@@ -19,4 +21,5 @@ if [[ -z "$lua" ]]; then
 	exit 1
 fi
 
-exec "$lua" tests/run.lua "$@"
+lib="$(bash scripts/fetch-wut.sh)"
+exec "$lua" "$lib/wowtest/cli.lua" "$@"

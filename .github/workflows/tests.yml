@@ -23,5 +23,14 @@ jobs:
           persist-credentials: false
       - name: Install LuaJIT
         run: sudo apt-get update && sudo apt-get install -y luajit
+      - name: Cache wow-ui-testing
+        uses: actions/cache@v4
+        with:
+          path: .wut
+          key: wut-${{ hashFiles('.wut-version', 'tests/wut.config.lua') }}
+      - name: Fetch wow-ui-testing
+        run: bash scripts/fetch-wut.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.WUT_TOKEN || github.token }}
       - name: Run all tests and addon syntax checks
         run: bash scripts/run-tests.sh --times -j
