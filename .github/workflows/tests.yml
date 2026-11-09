@@ -23,5 +23,48 @@ jobs:
           persist-credentials: false
       - name: Install LuaJIT
         run: sudo apt-get update && sudo apt-get install -y luajit
+      - name: Cache wow-ui-testing
+        uses: actions/cache@v4
+        with:
+          path: .wut
+          key: wut-${{ hashFiles('.wut-version', 'tests/wut.config.lua') }}
+      - name: Fetch wow-ui-testing
+        run: bash scripts/fetch-wut.sh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Run all tests and addon syntax checks
         run: bash scripts/run-tests.sh --times -j
+
+  proof:
+    name: UI proof
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install LuaJIT, librsvg, ImageMagick and jq
+        run: sudo apt-get update && sudo apt-get install -y luajit librsvg2-bin imagemagick jq
+      - name: Cache wow-ui-testing
+        uses: actions/cache@v4
+        with:
+          path: .wut
+          key: wut-${{ hashFiles('.wut-version', 'tests/wut.config.lua') }}
+      - name: Cache Blizzard art
+        uses: actions/cache@v4
+        with:
+          path: .proof-art
+          key: proof-art-${{ hashFiles('tests/proof/setup.lua', 'tests/proof/atlases.lua') }}
+      - name: Render the Titan bar and Socialite tooltip
+        run: bash scripts/proof.sh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SOCIALITE_PROOF_DIR: proof
+      - name: Upload UI proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-proof
+          path: proof/
+          if-no-files-found: error

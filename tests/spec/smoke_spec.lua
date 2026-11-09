@@ -74,7 +74,7 @@ describe("Socialite.toc #smoke", function()
 	it("renders an empty tooltip without errors", function()
 		local ns = Helpers.LoadAddon()
 		assert.has_no_error(function() ns.dataobj.OnEnter(UIParent) end)
-		assert.same({}, Mock.printed)
+		assert.same({}, Mock.messages)
 	end)
 
 	it("registers the /socialite command", function()

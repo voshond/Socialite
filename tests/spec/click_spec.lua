@@ -37,7 +37,7 @@ local function Open(bnet)
 	Mock.SetFriends(FRIENDS)
 	Mock.SetBattleNet(bnet or { BattleNetFriend() })
 	Helpers.OpenTooltip(ns)
-	assert.same({}, Mock.printed, "tooltip rendered without errors")
+	assert.same({}, Mock.messages, "tooltip rendered without errors")
 	return ns
 end
 
