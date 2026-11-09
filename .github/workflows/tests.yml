@@ -60,10 +60,11 @@ jobs:
         run: bash scripts/proof.sh
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          SOCIALITE_PROOF_DIR: proof
       - name: Upload UI proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ui-proof
-          path: .proof/
+          path: proof/
           if-no-files-found: error
