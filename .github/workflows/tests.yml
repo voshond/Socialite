@@ -65,5 +65,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ui-proof
-          path: .proof/
+          path: ${{ github.workspace }}/.proof/
           if-no-files-found: error
