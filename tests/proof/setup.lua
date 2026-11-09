@@ -7,7 +7,6 @@ local Raster = require("wowproof.raster")
 local BlizzardArt = require("wowproof.sources.wow_ui_textures")
 local ClientFiles = require("wowproof.sources.wago_casc")
 local AtlasTable = require("wowproof.sources.atlas_table")
-local Paint = require("wowproof.paint")
 
 local Mock = Helpers.Mock
 
@@ -47,14 +46,6 @@ Mock.Extend("SocialiteProof", {
 	end,
 })
 
--- Keep the spaces between colour runs ("|cff..Thrall|r |cff..Officer|r"),
--- which SVG collapses at tspan edges by default.
-local Render = Paint.Render
-function Paint.Render(options)
-	local svg, info = Render(options)
-	return (svg:gsub("<text ", '<text xml:space="preserve" ')), info
-end
-
 -- Socialite's and Titan's own textures, by their Interface\AddOns path.
 function Setup.AddonTexture(path)
 	if type(path) ~= "string" or path:lower():sub(1, #ADDON_PREFIX) ~= ADDON_PREFIX then return nil end
@@ -73,21 +64,13 @@ function Setup.Texture(path)
 	return Setup.AddonTexture(path) or blizzardArt(path) or clientFiles(path)
 end
 
--- Like the client, an empty texture path draws nothing (Titan's bar backdrop).
 function Setup.Adapter()
-	local adapter = MockState({
+	return MockState({
 		isSecret = Mock.IsSecret,
 		reveal = function(value) return value.secretValue end,
 		objects = function() return Mock.objects end,
 		globals = _G,
 	})
-	local Texture = adapter.Texture
-	adapter.Texture = function(region)
-		local info = Texture(region)
-		if info and info.file == "" then info.file = nil end
-		return info
-	end
-	return adapter
 end
 
 -- Every scenario must paint Titan's bar skin: a live background texture of

@@ -209,6 +209,15 @@ do
   f:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
   f:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
 
-  f:SetScript("OnEvent", updateText)
+  local ready = false
+  f:SetScript("OnEvent", function(_, event)
+    if event == "PLAYER_ENTERING_WORLD" and not ready then
+      C_Timer.After(0, function()
+        ready = true
+        updateText()
+      end)
+    end
+    if ready then updateText() end
+  end)
 
 end
