@@ -4,16 +4,10 @@ local Loader = require("wowmock.loader")
 
 local Helpers = { Mock = Mock, Loader = Loader }
 
--- AceConfig-3.0.xml lists AceConfigDropdown inside an XML comment. Titan's
--- zhCN and zhTW locales start with a UTF-8 BOM, which the client skips and
--- loadfile can't; AceLocale ignores both on the enUS mock anyway.
-Loader.Skip({ "AceConfigDropdown-3.0", "locale/Localization.CN.lua", "locale/Localization.TW.lua" })
-
 -- Every file the TOC loads, in order, after expanding XML includes.
 function Helpers.TocFiles(tocPath)
 	local out = {}
 	local function Collect(path)
-		if path:find("AceConfigDropdown-3.0", 1, true) then return end
 		if path:match("%.xml$") then
 			local dir = path:match("^(.*)/[^/]+$")
 			local xml = assert(io.open(path)):read("*a"):gsub("<!%-%-.-%-%->", "")
@@ -71,7 +65,6 @@ function Helpers.LoadWithTitan(options)
 	local ns = Loader.LoadToc("./Socialite.toc", "Socialite")
 	Mock.FireEvent("ADDON_LOADED", "Titan")
 	Mock.FireEvent("ADDON_LOADED", "Socialite")
-	Mock.loggedIn = true
 	Mock.FireEvent("PLAYER_LOGIN")
 	Mock.FireEvent("PLAYER_ENTERING_WORLD", true, false)
 	Mock.RunTimers()

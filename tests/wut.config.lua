@@ -3,7 +3,7 @@ return {
 	path = { "./tests/?.lua" },
 	-- Titan Panel 9.3.4 (Interface 16001), the WoWInterface archive build.
 	-- It ships only as release zips, so it is pinned by URL and sha256.
-	releases = {
+	addons = {
 		{
 			name = "Titan",
 			url = "https://cdn.wowinterface.com/downloads/getfile.php?id=8092&aid=172859",
