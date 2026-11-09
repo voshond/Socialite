@@ -55,11 +55,13 @@ end
 -- Fresh mock client with Titan Panel loaded first and Socialite after it,
 -- then the login events that make Titan build its bars and LDB buttons.
 -- Socialite goes on Titan's top bar the way the player adds it from Titan's
--- menu; returns the addon namespace and its Titan button.
+-- menu; returns the addon namespace and its Titan button. options.setup runs
+-- on the fresh client before any addon loads (social data present at login).
 function Helpers.LoadWithTitan(options)
 	options = options or {}
 	require("mock.titan")
 	Helpers.Install()
+	if options.setup then options.setup() end
 	_G.SocialiteSettings = options.saved
 	Loader.LoadAddon("Titan")
 	local ns = Loader.LoadToc("./Socialite.toc", "Socialite")
