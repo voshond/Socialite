@@ -47,6 +47,30 @@ Layout:
 Add a global to `tests/mock/socialite.lua` only when Socialite or a vendored lib needs it; pieces every addon
 needs belong in the library.
 
+## UI proof
+
+```sh
+bash scripts/proof.sh            # render every scenario to .proof/, plus .proof/index.html
+bash scripts/proof.sh collapsed  # only scenarios whose name contains "collapsed"
+```
+
+Each scenario loads Titan Panel and Socialite like the specs do, seeds guild, friend and Battle.net data, and hovers
+the Socialite button on Titan's top bar. It then renders the bar and the open tooltip with the library's `wowproof`
+to `.proof/<scenario>.svg` and `.png`. The scenarios are a full tooltip, a collapsed guild header (it must have no
+member rows) and the empty state. They live in `tests/proof/scenarios.lua`. A scenario fails if the tooltip didn't
+open, its checks fail, or the client printed anything.
+
+It needs LuaJIT, `rsvg-convert` (librsvg) for PNGs, ImageMagick for Titan's `.tga` art, and `curl` and `jq` for
+Blizzard art. Blizzard art comes through the library's pinned sources (Gethe/wow-ui-textures and wago.tools for the
+client build) and is cached in the gitignored `.proof-art/`. The client atlases the mock uses (the Forever tooltip
+nine-slice) are pinned in `tests/proof/atlases.lua`. Regenerate it after the mock starts using a new atlas:
+
+```sh
+python3 -B .wut/scripts/atlas_catalog.py --fetch --scan 'tests/mock/*.lua' --output tests/proof/atlases.lua
+```
+
+CI renders the proof on every pull request and uploads `.proof/` as the `ui-proof` artifact.
+
 ## Installing into the game
 
 ```sh

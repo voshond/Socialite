@@ -24,6 +24,7 @@ end
 local function ButtonText(frame, name)
 	local text = frame:CreateFontString(Child(name, "Text"), "ARTWORK", "GameFontNormalSmall")
 	text:SetPoint("LEFT", frame, "LEFT", 0, 1)
+	text:SetJustifyH("LEFT")
 	frame:SetFontString(text)
 	return text
 end
@@ -108,8 +109,6 @@ local function InstallClient(G)
 	G.LIGHTYELLOW_FONT_COLOR_CODE = "|cffffff9a"
 	G.GRAY_FONT_COLOR = { r = 0.5, g = 0.5, b = 0.5 }
 	G.RED_FONT_COLOR = { r = 1, g = 0.1, b = 0.1 }
-	G.TOOLTIP_DEFAULT_COLOR = { r = 1, g = 1, b = 1 }
-	G.TOOLTIP_DEFAULT_BACKGROUND_COLOR = { r = 0.09, g = 0.09, b = 0.19 }
 	for name, text in pairs({ ALL = "All", BACKGROUND = "Background", COLOR = "Color", COMMAND = "Command",
 		CUSTOM = "Custom", FACTION = "Faction", HELP_LABEL = "Help", HIDE = "Hide", HIGH = "High", LOW = "Low",
 		IGNORE = "Ignore", LABEL_NOTE = "Note", MUTE = "Mute", MUTED = "Muted", NO = "No", NONE = "None", PVP = "PvP",
