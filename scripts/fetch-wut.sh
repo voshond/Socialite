@@ -13,6 +13,11 @@
 # WUT_REPO     library repository (default: voshond/wow-ui-testing)
 # WUT_SOURCE   fetch the library from this local git repository instead
 # WUT_CONFIG   host config (default: wut.config.lua, then tests/wut.config.lua)
+#
+# Socialite addition: addons released only as zips go in the config's
+# `releases` ({ name, url, sha256, toc }); the zip is checked against its
+# sha256 and unpacked into .wut/addons/<name>/ like a pinned addon.
+#
 # GITHUB_TOKEN / GH_TOKEN (or a logged-in gh) are used when set: they lift
 # GitHub's anonymous rate limit and reach private forks.
 set -euo pipefail
@@ -97,6 +102,56 @@ while IFS=$'\t' read -r name source ref toc; do
 	fi
 	if [[ -n "$toc" ]]; then printf '%s\n' "$toc" > "$destination/.wut-toc"; else rm -f -- "$destination/.wut-toc"; fi
 done <<< "$addons"
+
+config_file="${WUT_CONFIG:-}"
+if [[ -z "$config_file" ]]; then
+	for candidate in wut.config.lua tests/wut.config.lua; do
+		if [[ -f "$candidate" ]]; then config_file="$candidate"; break; fi
+	done
+fi
+releases=""
+if [[ -n "$config_file" ]]; then
+	lua="$(command -v luajit || command -v lua5.1 || true)"
+	[[ -n "$lua" ]] || die "LuaJIT or Lua 5.1 is required to read $config_file"
+	releases="$(WUT_CONFIG_FILE="$config_file" "$lua" -e '
+		for _, r in ipairs(dofile(os.getenv("WUT_CONFIG_FILE")).releases or {}) do
+			print(table.concat({ r.name or "", r.url or "", r.sha256 or "", r.toc or "" }, "\t"))
+		end')" || die "cannot read the releases from $config_file"
+fi
+
+sha256() {
+	if command -v sha256sum >/dev/null; then sha256sum "$1" | awk '{ print $1 }'; else shasum -a 256 "$1" | awk '{ print $1 }'; fi
+}
+
+while IFS=$'\t' read -r name url digest toc; do
+	[[ -n "$name" ]] || continue
+	[[ "$name" =~ ^[A-Za-z0-9_.-]+$ ]] || die "release name '$name' must be folder-safe"
+	[[ -z "${wanted[$name]:-}" ]] || die "release $name repeats an addon name"
+	[[ "$digest" =~ ^[0-9a-f]{64}$ ]] || die "release $name needs a sha256 of 64 hex digits"
+	[[ "$url" == https://* ]] || die "release $name needs an https url"
+	wanted[$name]=1
+	destination="$wut_dir/addons/$name"
+	if [[ "$(current_ref "$destination")" == "$digest" ]]; then
+		say "release $name $digest already in .wut/addons"
+	else
+		scratch="$(mktemp -d)"
+		curl --fail --silent --show-error --location --retry 3 --max-time 300 -A "fetch-wut" "$url" -o "$scratch/release.zip"
+		actual="$(sha256 "$scratch/release.zip")"
+		if [[ "$actual" != "$digest" ]]; then
+			rm -rf -- "$scratch"
+			die "release $name: sha256 $actual does not match the pinned $digest"
+		fi
+		rm -rf -- "$destination.new"
+		mkdir -p "$destination.new"
+		unzip -q "$scratch/release.zip" -d "$destination.new"
+		rm -rf -- "$scratch"
+		printf '%s\n' "$digest" > "$destination.new/.wut-ref"
+		rm -rf -- "$destination"
+		mv "$destination.new" "$destination"
+		say "fetched release $name $digest into .wut/addons"
+	fi
+	if [[ -n "$toc" ]]; then printf '%s\n' "$toc" > "$destination/.wut-toc"; else rm -f -- "$destination/.wut-toc"; fi
+done <<< "$releases"
 
 if [[ -d "$wut_dir/addons" ]]; then
 	for folder in "$wut_dir/addons"/*/; do

@@ -4,8 +4,10 @@ local Loader = require("wowmock.loader")
 
 local Helpers = { Mock = Mock, Loader = Loader }
 
--- AceConfig-3.0.xml lists AceConfigDropdown inside an XML comment.
-Loader.Skip({ "AceConfigDropdown-3.0" })
+-- AceConfig-3.0.xml lists AceConfigDropdown inside an XML comment. Titan's
+-- zhCN and zhTW locales start with a UTF-8 BOM, which the client skips and
+-- loadfile can't; AceLocale ignores both on the enUS mock anyway.
+Loader.Skip({ "AceConfigDropdown-3.0", "locale/Localization.CN.lua", "locale/Localization.TW.lua" })
 
 -- Every file the TOC loads, in order, after expanding XML includes.
 function Helpers.TocFiles(tocPath)
@@ -37,6 +39,40 @@ function Helpers.LoadAddon(options)
 		Mock.FireEvent("ADDON_LOADED", "Socialite")
 	end
 	return ns
+end
+
+-- Fresh mock client with Titan Panel loaded first and Socialite after it,
+-- then the login events that make Titan build its bars and LDB buttons.
+-- Socialite goes on Titan's top bar the way the player adds it from Titan's
+-- menu; returns the addon namespace and its Titan button.
+function Helpers.LoadWithTitan(options)
+	options = options or {}
+	require("mock.titan")
+	Mock.Install()
+	_G.SocialiteSettings = options.saved
+	Loader.LoadAddon("Titan")
+	local ns = Loader.LoadToc("./Socialite.toc", "Socialite")
+	Mock.FireEvent("ADDON_LOADED", "Titan")
+	Mock.FireEvent("ADDON_LOADED", "Socialite")
+	Mock.loggedIn = true
+	Mock.FireEvent("PLAYER_LOGIN")
+	Mock.FireEvent("PLAYER_ENTERING_WORLD", true, false)
+	Mock.RunTimers()
+	Titan_G.plugins.AddOnBar("Bar", "Socialite")
+	return ns, _G[TitanUtils_ButtonName("Socialite")]
+end
+
+-- The text a Titan button shows.
+function Helpers.TitanText(button)
+	return _G[button:GetName() .. "Text"]:GetText()
+end
+
+-- Socialite's tooltip frame when it is anchored to frame.
+function Helpers.TooltipAnchoredTo(frame)
+	for _, object in ipairs(Mock.objects) do
+		local point = object.__type == "ScrollFrame" and object.__state.points[1]
+		if point and point[2] == frame then return object end
+	end
 end
 
 -- Opens the data broker tooltip the way hovering the data text does.

@@ -3,7 +3,7 @@
 ## Tests
 
 Specs run offline on the shared [wow-ui-testing](https://github.com/voshond/wow-ui-testing) library: its
-`wowtest` runner and `wowmock` client mock. Nothing to install beyond LuaJIT (or Lua 5.1) and curl.
+`wowtest` runner and `wowmock` client mock. Nothing to install beyond LuaJIT (or Lua 5.1), curl and unzip.
 
 ```sh
 sudo pacman -S luajit            # Arch; Debian/Ubuntu: sudo apt-get install luajit
@@ -23,6 +23,14 @@ commit into the gitignored `.wut/` and does nothing when it is already there. Wh
 commit SHA (and its tag as a comment) in `.wut-version`. The download uses `GITHUB_TOKEN`, `GH_TOKEN` or a
 logged-in `gh` when there is one.
 
+Tests also load Titan Panel, the way most players run Socialite: as a Titan button fed by its LDB data
+object. Titan only ships as release zips, so `tests/wut.config.lua` pins one under `releases` by its
+WoWInterface archive URL and sha256. `fetch-wut.sh` checks the download against it and unpacks it into
+`.wut/addons/Titan/`. It is never committed or packaged. To bump it, take the new version's `aid=` archive link
+from the WoWInterface page, then update `url` and `sha256` (`curl -sL <url> | sha256sum`).
+`Helpers.LoadWithTitan()` loads Titan, then Socialite, fires the login events and adds Socialite to Titan's top
+bar. It returns the namespace and the Titan button.
+
 Layout:
 
 - `tests/wut.config.lua`: the runner config: spec dir, `package.path`, and the syntax check over every Lua file
@@ -30,6 +38,8 @@ Layout:
 - `tests/mock/socialite.lua`: Socialite's extension of `wowmock` (`Mock.Extend`): guild, friend and Battle.net
   APIs seeded with `Mock.SetGuild/SetFriends/SetBattleNet`, `Mock.SetModifiers({ shift = true })`, and chat and
   group actions recorded for `Mock.Calls("C_PartyInfo.InviteUnit")`. Client chat lands in `Mock.messages`.
+- `tests/mock/titan.lua`: the frames and templates from Titan's XML (wowmock only runs the Lua in XML files),
+  plus the client globals Titan reads.
 - `tests/helpers.lua`: `Helpers.LoadAddon()` loads `Socialite.toc` (expanding `embeds.xml` and the vendored
   libs) into a fresh mock and fires `ADDON_LOADED`; `Helpers.ClickLine` clicks a tooltip line.
 - `tests/spec/*_spec.lua`: the specs.

@@ -65,8 +65,56 @@ end
 local Methods = Mock.Methods
 Methods.IsMouseOver = Methods.IsMouseOver or function() return false end
 Methods.IsEnabled = Methods.IsEnabled or function() return true end
+Methods.HasScript = Methods.HasScript or function() return true end
 Methods.GetStringHeight = Methods.GetStringHeight or function() return 12 end
 Methods.GetFontObject = Methods.GetFontObject or function(self) return self.__state.fontObject end
+
+-- Like the client, anchors accept a frame name for the relative frame.
+local SetPoint, SetAllPoints = Methods.SetPoint, Methods.SetAllPoints
+function Methods:SetPoint(point, relativeTo, ...)
+	if type(relativeTo) == "string" then relativeTo = _G[relativeTo] end
+	return SetPoint(self, point, relativeTo, ...)
+end
+function Methods:SetAllPoints(relativeTo)
+	if type(relativeTo) == "string" then relativeTo = _G[relativeTo] end
+	return SetAllPoints(self, relativeTo)
+end
+
+-- Screen geometry from the anchors, through wowproof's layout. The client
+-- measures from the bottom left; the layout from the top left.
+local Layout = require("wowproof.layout")
+local adapter = require("wowproof.adapters.mock_state")({ objects = function() return Mock.objects end })
+
+local function ScreenRect(region)
+	local width, height = UIParent:GetSize()
+	local rect = Layout.New(adapter, { width = width, height = height }):Rect(region)
+	if not rect then return nil end
+	return rect.left, height - rect.top - rect.height, rect.width, rect.height
+end
+
+function Methods:GetLeft()
+	local left = ScreenRect(self)
+	return left
+end
+function Methods:GetRight()
+	local left, _, width = ScreenRect(self)
+	return left and left + width
+end
+function Methods:GetBottom()
+	local _, bottom = ScreenRect(self)
+	return bottom
+end
+function Methods:GetTop()
+	local _, bottom, _, height = ScreenRect(self)
+	return bottom and bottom + height
+end
+function Methods:GetCenter()
+	local left, bottom, width, height = ScreenRect(self)
+	if left then return left + width / 2, bottom + height / 2 end
+end
+function Methods:GetRect()
+	return ScreenRect(self)
+end
 
 -- Like real frames, unknown lowercase keys (addon fields such as
 -- tooltip.anchor) read as nil; client methods are all capitalized.
