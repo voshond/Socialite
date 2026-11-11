@@ -63,10 +63,11 @@ open, its checks fail, or the client printed anything.
 It needs LuaJIT, `rsvg-convert` (librsvg) for PNGs, ImageMagick for Titan's `.tga` art, and `curl` and `jq` for
 Blizzard art. Blizzard art comes through the library's pinned sources (Gethe/wow-ui-textures and wago.tools for the
 client build) and is cached in the gitignored `.proof-art/`. The client atlases the mock uses (the Forever tooltip
-nine-slice) are pinned in `tests/proof/atlases.lua`. Regenerate it after the mock starts using a new atlas:
+nine-slice) are pinned in `tests/proof/atlases.lua`. Regenerate it after the mock starts using a new atlas or a `.wut-version` bump changes the build (the nine-slice names come from the library's `wowmock/templates.lua`):
 
 ```sh
-python3 -B .wut/scripts/atlas_catalog.py --fetch --scan 'tests/mock/*.lua' --output tests/proof/atlases.lua
+python3 -B .wut/scripts/atlas_catalog.py --fetch --scan 'tests/mock/*.lua' '.wut/wowmock/templates.lua' \
+	--output tests/proof/atlases.lua
 ```
 
 CI renders the proof on every pull request and uploads `.proof/` as the `ui-proof` artifact.
