@@ -63,6 +63,14 @@ end
 local function InstallClient(G)
 	G.GetBindingText = function(key) return key end
 
+	-- Repeating timers wait until a spec runs them (Mock.tickers[i].callback()).
+	Mock.tickers = {}
+	G.C_Timer.NewTicker = function(seconds, callback)
+		local ticker = { seconds = seconds, callback = callback, Cancel = noop }
+		Mock.tickers[#Mock.tickers + 1] = ticker
+		return ticker
+	end
+
 	-- Strings.
 	G.CHAT_FLAG_AFK = "<AFK>"
 	G.CHAT_FLAG_DND = "<DND>"
